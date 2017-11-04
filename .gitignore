@@ -57,3 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+# add to
+.DS_Store
+.vscode
+.editorconfig

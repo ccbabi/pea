@@ -1,13 +1,6 @@
-# pea
-Pea is a middleware layer for web, inspired by the [connect](https://github.com/senchalabs/connect)
+const Pea = require('..')
 
-## Install
-```sh
-$ npm install pea
-```
-
-## Quick start
-```javascript
+// demo1
 var p = new Pea([function one (next) {
   console.log('1')
   next()
@@ -35,10 +28,5 @@ p.use(function four (err, next) {
 })
 
 p.start(function done () {
-  console.log(arguments)
   console.log('done')
 })
-```
-
-## License
-[MIT](http://opensource.org/licenses/MIT)
