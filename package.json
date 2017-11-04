@@ -1,5 +1,5 @@
 {
-  "name": "pea",
+  "name": "pea-js",
   "version": "0.1.0",
   "description": "Pea is a middleware layer for web, inspired by the connect",
   "main": "dist/pea.js",
