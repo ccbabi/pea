@@ -10,22 +10,37 @@ function fnHasError(fn: Function) {
 }
 
 class Pea {
-  private done = noop
+  private done: Function = noop
   private stack: Function[] = []
   private head = 0
   private tail = 0
-  private one = false
 
-  constructor(beans: Array<Function | Pea> = []) {
-    beans.forEach(bean => this.use(bean))
+  constructor(beans?: Array<Function | Pea>, done?: Function) {
+    if (beans && beans instanceof Array) {
+      beans.forEach(bean => this.use(bean))
+    } else if (typeof beans === 'function') {
+      this.done = beans
+    }
+
+    if (typeof done === 'function') {
+      this.done = done
+    }
   }
 
   use(bean: Function | Pea): Pea {
     let fn: Function
     if (bean instanceof Pea) {
+      var that = this
       fn = function () {
         const args = arrPro.slice.apply(arguments)
-        args.unshift(args.pop())
+        const next = args.pop()
+        const beanDone = bean.done
+
+        args.unshift(function () {
+          const args = arrPro.slice.apply(arguments)
+          if(beanDone.apply(arguments) !== false) next.apply(that, args)
+        })
+
         bean.start.apply(bean, args)
       }
     } else {
@@ -46,17 +61,6 @@ class Pea {
     this.next.apply(this, arguments)
   }
 
-  oneStart (): void {
-    this.one = true
-    this.start.apply(this, arguments)
-  }
-
-  destroy (): void {
-    this.head = 0
-    this.tail = 0
-    this.stack.length = 0
-  }
-
   private next(err): void {
     this.run.apply(this, arguments)
   }
@@ -69,9 +73,6 @@ class Pea {
     if (this.head >= this.tail) {
       this.done && this.done.apply(this, args)
       this.head = 0
-      if (this.one) {
-        this.destroy()
-      }
       return
     }
 

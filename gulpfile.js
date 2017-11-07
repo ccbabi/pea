@@ -50,4 +50,9 @@ gulp.task('umd', ['tsc'], function () {
     .pipe(gulp.dest('dist'))
 })
 
-gulp.task('default', function () {})
+gulp.task('watch', function () {
+  gulp.watch('index.ts', ['umd'])
+})
+
+gulp.task('default', function () {
+})

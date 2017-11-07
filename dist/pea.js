@@ -19,22 +19,35 @@ function fnHasError(fn) {
     return errs.indexOf(matchs[1]) > -1;
 }
 var Pea = /** @class */ (function () {
-    function Pea(beans) {
-        if (beans === void 0) { beans = []; }
+    function Pea(beans, done) {
         var _this = this;
         this.done = noop;
         this.stack = [];
         this.head = 0;
         this.tail = 0;
-        this.one = false;
-        beans.forEach(function (bean) { return _this.use(bean); });
+        if (beans && beans instanceof Array) {
+            beans.forEach(function (bean) { return _this.use(bean); });
+        }
+        else if (typeof beans === 'function') {
+            this.done = beans;
+        }
+        if (typeof done === 'function') {
+            this.done = done;
+        }
     }
     Pea.prototype.use = function (bean) {
         var fn;
         if (bean instanceof Pea) {
+            var that = this;
             fn = function () {
                 var args = arrPro.slice.apply(arguments);
-                args.unshift(args.pop());
+                var next = args.pop();
+                var beanDone = bean.done;
+                args.unshift(function () {
+                    var args = arrPro.slice.apply(arguments);
+                    if (beanDone.apply(arguments) !== false)
+                        next.apply(that, args);
+                });
                 bean.start.apply(bean, args);
             };
         }
@@ -54,15 +67,6 @@ var Pea = /** @class */ (function () {
         }
         this.next.apply(this, arguments);
     };
-    Pea.prototype.oneStart = function () {
-        this.one = true;
-        this.start.apply(this, arguments);
-    };
-    Pea.prototype.destroy = function () {
-        this.head = 0;
-        this.tail = 0;
-        this.stack.length = 0;
-    };
     Pea.prototype.next = function (err) {
         this.run.apply(this, arguments);
     };
@@ -73,9 +77,6 @@ var Pea = /** @class */ (function () {
         if (this.head >= this.tail) {
             this.done && this.done.apply(this, args);
             this.head = 0;
-            if (this.one) {
-                this.destroy();
-            }
             return;
         }
         first = args[0];
