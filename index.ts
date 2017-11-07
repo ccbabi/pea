@@ -37,8 +37,7 @@ class Pea {
         const beanDone = bean.done
 
         args.unshift(function () {
-          const args = arrPro.slice.apply(arguments)
-          if(beanDone.apply(arguments) !== false) next.apply(that, args)
+          if(beanDone.apply(bean, arguments) !== false) next.apply(that, arguments)
         })
 
         bean.start.apply(bean, args)

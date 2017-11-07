@@ -8,8 +8,8 @@ var p1 = new Pea([function p1f1 (next) {
 var p2 = new Pea([function p2f1 (next) {
   console.log('p2-1')
   next(12)
-}], function p2done () {
-  console.log('p2-done')
+}], function p2done (n) {
+  console.log('p2-done', n)
 
   // abort
   // return false

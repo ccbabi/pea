@@ -44,9 +44,8 @@ var Pea = /** @class */ (function () {
                 var next = args.pop();
                 var beanDone = bean.done;
                 args.unshift(function () {
-                    var args = arrPro.slice.apply(arguments);
-                    if (beanDone.apply(arguments) !== false)
-                        next.apply(that, args);
+                    if (beanDone.apply(bean, arguments) !== false)
+                        next.apply(that, arguments);
                 });
                 bean.start.apply(bean, args);
             };
