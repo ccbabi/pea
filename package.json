@@ -7,7 +7,6 @@
   "author": "ccbabi <kxxw28@gmail.com>",
   "license": "MIT",
   "files": [
-    "index.ts",
     "dist/*.js"
   ],
   "keywords": [
@@ -21,8 +20,11 @@
     ]
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
     "gulp-banner": "^0.1.3",
     "gulp-rename": "^1.2.2",
     "gulp-typescript": "^3.2.3",

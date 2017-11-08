@@ -5,6 +5,7 @@ var del = require('del')
 var rename = require('gulp-rename')
 var uglify = require('gulp-uglify')
 var banner = require('gulp-banner')
+var babel = require('gulp-babel')
 var pkg = require('./package.json')
 
 var tsProject = ts.createProject('tsconfig.json')
@@ -28,6 +29,7 @@ gulp.task('tsc', ['clean'], function () {
   return tsProject.src()
     .pipe(tsProject())
     .pipe(rename('pea.js'))
+    .pipe(babel())
     .pipe(gulp.dest('dist'))
 })
 
@@ -40,6 +42,9 @@ gulp.task('umd', ['tsc'], function () {
       namespace: function (file) {
         return 'Pea'
       }
+    }))
+    .pipe(banner(comment, {
+      pkg: pkg
     }))
     .pipe(gulp.dest('dist'))
     .pipe(uglify())

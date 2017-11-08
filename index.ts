@@ -37,9 +37,16 @@ class Pea {
         const beanDone = bean.done
 
         args.unshift(function () {
-          if(beanDone.apply(bean, arguments) !== false) next.apply(that, arguments)
+          let ret
+          try {
+            ret = beanDone.apply(bean, arguments)
+          } catch(e) {
+            return void next(e)
+          }
+          if (ret !== false) {
+            next.apply(that, arguments)
+          }
         })
-
         bean.start.apply(bean, args)
       }
     } else {
@@ -51,13 +58,13 @@ class Pea {
   }
 
   start(done?: Function): void {
-    if (!this.stack) {
-      throw Error('')
-    }
-    if (done) {
-      this.done = arrPro.shift.apply(arguments)
-    }
+    if (done) this.done = arrPro.shift.apply(arguments)
+    this.head = 0
     this.next.apply(this, arguments)
+  }
+
+  setDone (done: Function): void {
+    if (typeof done === 'function') this.done = done
   }
 
   private next(err): void {
@@ -69,11 +76,7 @@ class Pea {
     let hasErr = false
     const args = arrPro.slice.apply(arguments)
 
-    if (this.head >= this.tail) {
-      this.done && this.done.apply(this, args)
-      this.head = 0
-      return
-    }
+    if (this.head >= this.tail) return void this.done.apply(this, args)
 
     first = args[0]
 
