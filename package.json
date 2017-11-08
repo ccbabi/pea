@@ -1,6 +1,6 @@
 {
   "name": "pea-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Pea is a middleware layer for web, inspired by the connect",
   "main": "dist/pea.js",
   "repository": "git@github.com:ccbabi/pea.git",
