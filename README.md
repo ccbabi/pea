@@ -3,8 +3,10 @@ Pea is a middleware layer for web, inspired by the [connect](https://github.com/
 
 ## Example
 
-**exmaple/demo1.js**
 ```javascript
+const Pea = require('..')
+
+// demo1
 var p = new Pea([function one (next) {
   console.log('1')
   next()
@@ -31,43 +33,7 @@ p.use(function four (err, next) {
   next()
 })
 
-p.start(function done () {
-  console.log(arguments)
-  console.log('done')
-})
-```
-
-**example/demo2.js**
-```javascript
-onst Pea = require('..')
-
-var p1 = new Pea([function p1f1 (next) {
-  console.log('p1-1')
-  next()
-}])
-
-var p2 = new Pea([function p2f1 (next) {
-  console.log('p2-1')
-  next(12)
-}], function p2done (n) {
-  console.log('p2-done', n)
-
-  // abort
-  // return false
-})
-
-// sub pea
-p1.use(p2)
-
-p1.use(function p1f2 (n, next) {
-  console.log('p1-2', n)
-  next()
-})
-
-p1.start(function p1done () {
-  console.log('p1-done')
-})
-
+p.start()
 ```
 
 ## License

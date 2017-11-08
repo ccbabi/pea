@@ -7,9 +7,7 @@ var p = new Pea([function one (next) {
 }, function two (next) {
   console.log('2')
   next()
-}], function () {
-  console.log('done')
-})
+}])
 
 p.use(function three (next) {
   console.log('3')

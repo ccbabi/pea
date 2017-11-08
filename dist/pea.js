@@ -1,5 +1,5 @@
 /*!
- * pea-js 0.2.0
+ * pea-js 0.2.1
  * Pea is a middleware layer for web, inspired by the connect
  * Copyright 2017, ccbabi <kxxw28@gmail.com>
  * Released under the MIT license.
@@ -22,7 +22,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var arrPro = Array.prototype;
 var fnPro = Function.prototype;
-var noop = function noop() {};
 var errs = ['e', 'err', 'error'];
 function fnHasError(fn) {
     var matchs = fnPro.toString.call(fn).match(/\((\w+)/);
@@ -31,12 +30,11 @@ function fnHasError(fn) {
 }
 
 var Pea = function () {
-    function Pea(beans, done) {
+    function Pea(beans) {
         var _this = this;
 
         _classCallCheck(this, Pea);
 
-        this.done = noop;
         this.stack = [];
         this.head = 0;
         this.tail = 0;
@@ -44,11 +42,6 @@ var Pea = function () {
             beans.forEach(function (bean) {
                 return _this.use(bean);
             });
-        } else if (typeof beans === 'function') {
-            this.done = beans;
-        }
-        if (typeof done === 'function') {
-            this.done = done;
         }
     }
 
@@ -57,42 +50,28 @@ var Pea = function () {
         value: function use(bean) {
             var fn = void 0;
             if (bean instanceof Pea) {
-                var that = this;
-                fn = function fn() {
-                    var args = arrPro.slice.apply(arguments);
-                    var next = args.pop();
-                    var beanDone = bean.done;
-                    args.unshift(function () {
-                        var ret = void 0;
-                        try {
-                            ret = beanDone.apply(bean, arguments);
-                        } catch (e) {
-                            return void next(e);
-                        }
-                        if (ret !== false) {
-                            next.apply(that, arguments);
-                        }
+                fn = function () {
+                    var pnext = arrPro.pop.apply(arguments);
+                    bean.use(function () {
+                        arrPro.pop.apply(arguments);
+                        pnext.apply(this, arguments);
                     });
-                    bean.start.apply(bean, args);
-                };
+                    bean.use(function (e, next) {
+                        if (e) pnext(e);
+                    });
+                    bean.start.apply(bean, arguments);
+                }.bind(this);
             } else {
                 fn = bean;
             }
-            this.stack.push(fn);
-            this.tail = this.stack.length;
+            this.tail = this.stack.push(fn);
             return this;
         }
     }, {
         key: 'start',
-        value: function start(done) {
-            if (done) this.done = arrPro.shift.apply(arguments);
+        value: function start() {
             this.head = 0;
             this.next.apply(this, arguments);
-        }
-    }, {
-        key: 'setDone',
-        value: function setDone(done) {
-            if (typeof done === 'function') this.done = done;
         }
     }, {
         key: 'next',
@@ -103,26 +82,23 @@ var Pea = function () {
         key: 'run',
         value: function run() {
             var bean = void 0,
-                err = void 0,
-                first = void 0;
-            var hasErr = false;
+                err = void 0;
             var args = arrPro.slice.apply(arguments);
-            if (this.head >= this.tail) return void this.done.apply(this, args);
-            first = args[0];
-            if (first instanceof Error) {
-                hasErr = true;
-            } else {
-                while (args.length && first == undefined) {
-                    args.shift();
-                    first = args[0];
-                }
+            var first = args[0];
+            if (first instanceof Error) err = first;
+            if (this.head >= this.tail) {
+                if (err) throw err;
+                return;
+            }
+            while (!err && args.length && first == undefined) {
+                args.shift();
+                first = args[0];
             }
             bean = this.stack[this.head++];
-            args.push(this.next.bind(this));
-            if (hasErr && fnHasError(bean) || !hasErr && !fnHasError(bean)) {
+            if (err && fnHasError(bean) || !err && !fnHasError(bean)) {
+                args.push(this.next.bind(this));
                 try {
-                    bean.apply(this, args);
-                    return;
+                    return void bean.apply(this, args);
                 } catch (e) {
                     err = e;
                 }

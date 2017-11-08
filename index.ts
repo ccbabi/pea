@@ -1,6 +1,5 @@
 const arrPro = Array.prototype
 const fnPro = Function.prototype
-const noop = function () {}
 const errs = ['e', 'err', 'error']
 
 function fnHasError(fn: Function) {
@@ -10,92 +9,71 @@ function fnHasError(fn: Function) {
 }
 
 class Pea {
-  private done: Function = noop
   private stack: Function[] = []
   private head = 0
   private tail = 0
 
-  constructor(beans?: Array<Function | Pea>, done?: Function) {
+  constructor(beans?: Array<Function | Pea>) {
     if (beans && beans instanceof Array) {
       beans.forEach(bean => this.use(bean))
-    } else if (typeof beans === 'function') {
-      this.done = beans
-    }
-
-    if (typeof done === 'function') {
-      this.done = done
     }
   }
 
   use(bean: Function | Pea): Pea {
     let fn: Function
     if (bean instanceof Pea) {
-      var that = this
       fn = function () {
-        const args = arrPro.slice.apply(arguments)
-        const next = args.pop()
-        const beanDone = bean.done
+        const pnext = arrPro.pop.apply(arguments)
 
-        args.unshift(function () {
-          let ret
-          try {
-            ret = beanDone.apply(bean, arguments)
-          } catch(e) {
-            return void next(e)
-          }
-          if (ret !== false) {
-            next.apply(that, arguments)
-          }
+        bean.use(function () {
+          arrPro.pop.apply(arguments)
+          pnext.apply(this, arguments)
         })
-        bean.start.apply(bean, args)
-      }
+
+        bean.use(function (e, next) {
+          if (e) pnext(e)
+        })
+
+        bean.start.apply(bean, arguments)
+      }.bind(this)
     } else {
       fn = bean
     }
-    this.stack.push(fn)
-    this.tail = this.stack.length
+    this.tail = this.stack.push(fn)
     return this
   }
 
-  start(done?: Function): void {
-    if (done) this.done = arrPro.shift.apply(arguments)
+  start(): void {
     this.head = 0
     this.next.apply(this, arguments)
   }
 
-  setDone (done: Function): void {
-    if (typeof done === 'function') this.done = done
-  }
-
-  private next(err): void {
+  private next(err?: Error): void {
     this.run.apply(this, arguments)
   }
 
   private run(): void {
-    let bean, err, first
-    let hasErr = false
+    let bean, err
     const args = arrPro.slice.apply(arguments)
+    let first = args[0]
 
-    if (this.head >= this.tail) return void this.done.apply(this, args)
+    if (first instanceof Error) err = first
+    if (this.head >= this.tail) {
+      if (err) throw err
+      return
+    }
 
-    first = args[0]
-
-    if (first instanceof Error) {
-      hasErr = true
-    } else {
-      while (args.length && first == undefined) {
-        args.shift()
-        first = args[0]
-      }
+    while (!err && args.length && first == undefined) {
+      args.shift()
+      first = args[0]
     }
 
     bean = this.stack[this.head++]
-    args.push(this.next.bind(this))
 
-    if ((hasErr && fnHasError(bean)) || (!hasErr && !fnHasError(bean))) {
+    if ((err && fnHasError(bean)) || (!err && !fnHasError(bean))) {
+      args.push(this.next.bind(this))
       try {
-        bean.apply(this, args)
-        return
+        return void bean.apply(this, args)
       } catch (e) {
         err = e
       }
