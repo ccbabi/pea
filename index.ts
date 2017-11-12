@@ -26,7 +26,6 @@ export default class Pea {
       if ((bean as Pea) === this) return this
       fn = (...args: any[]) => {
         const pnext = args.pop()
-
         bean.use((...args) => {
           args.pop()
           pnext.apply(this, args)

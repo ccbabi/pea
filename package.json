@@ -6,7 +6,6 @@
   "repository": "git@github.com:ccbabi/pea.git",
   "author": "ccbabi <kxxw28@gmail.com>",
   "license": "MIT",
-  "types": "index.d.ts",
   "keywords": [
     "connect",
     "async",
@@ -15,5 +14,18 @@
   "files": [
     "index.js",
     "index.d.ts"
-  ]
+  ],
+  "scripts": {
+    "compile": "tsc",
+    "prepublish": "npm run compile",
+    "test": "mocha --require ts-node/register test/**/*.ts"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.44",
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.6.1"
+  }
 }
