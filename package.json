@@ -16,8 +16,10 @@
     "index.d.ts"
   ],
   "scripts": {
+    "clean": "rm -rf *.d.ts *.js",
     "compile": "tsc",
     "prepublish": "npm run compile",
+    "postpublish": "npm run clean",
     "test": "mocha --require ts-node/register test/**/*.ts"
   },
   "devDependencies": {
