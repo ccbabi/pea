@@ -1,4 +1,6 @@
 # Pea
+[![Build Status](https://travis-ci.org/ccbabi/pea.svg?branch=master)](https://travis-ci.org/ccbabi/pea)
+
 Pea is a middleware layer for web, inspired by the [connect](https://github.com/senchalabs/connect)
 
 ## Install
